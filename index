@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>底钱计算</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;padding:15px;background:#f5f5f7}
+  h2{text-align:center;margin:10px 0 14px}
+  .nav{display:flex;gap:10px;margin-bottom:12px}
+  .nav a{flex:1;text-decoration:none;text-align:center;padding:12px;border-radius:12px;background:#fff;border:1px solid #e5e5e5;color:#111}
+  .nav a.active{background:#007aff;color:#fff;border:none}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden}
+  th,td{border-bottom:1px solid #e5e5e5;padding:12px;text-align:center}
+  th{background:#f0f0f0;font-weight:600}
+  input{width:110px;text-align:center;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid #ccc;background:#fff}
+  .btn{width:100%;padding:14px;font-size:17px;background:#007aff;color:#fff;border:none;border-radius:12px;margin:14px 0}
+  .summary{background:#fff;border-radius:12px;padding:12px 14px}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;font-size:16px;border-bottom:1px solid #eee}
+  .row:last-child{border-bottom:none}
+  .label{color:#333}
+  .value{font-weight:700;text-align:right;min-width:110px}
+</style>
+</head>
+<body>
+
+<h2>底钱计算</h2>
+
+<div class="nav">
+  <a class="active" href="index.html">页面 1：底钱</a>
+  <a href="page2.html">页面 2：实收</a>
+</div>
+
+<table>
+  <tr><th>钱币</th><th>数量</th><th>金额 (£)</th></tr>
+  <tr><td>£1</td>    <td><input type="number" id="c1"   placeholder="0" min="0" inputmode="numeric"></td><td id="t1">0.00</td></tr>
+  <tr><td>£0.5</td>  <td><input type="number" id="c05"  placeholder="0" min="0" inputmode="numeric"></td><td id="t05">0.00</td></tr>
+  <tr><td>£0.2</td>  <td><input type="number" id="c02"  placeholder="0" min="0" inputmode="numeric"></td><td id="t02">0.00</td></tr>
+  <tr><td>£0.1</td>  <td><input type="number" id="c01"  placeholder="0" min="0" inputmode="numeric"></td><td id="t01">0.00</td></tr>
+  <tr><td>£0.05</td> <td><input type="number" id="c005" placeholder="0" min="0" inputmode="numeric"></td><td id="t005">0.00</td></tr>
+</table>
+
+<button class="btn" onclick="resetAll()">一键清零</button>
+
+<div class="summary">
+  <div class="row"><div class="label">总金额</div><div class="value">£<span id="total">0.00</span></div></div>
+  <div class="row"><div class="label">需去除金额（取最近 £5）</div><div class="value">£<span id="remove">0.00</span></div></div>
+  <div class="row"><div class="label">可计入金额（£5 的倍数）</div><div class="value">£<span id="valid">0.00</span></div></div>
+  <div class="row"><div class="label">距离 £200 还差</div><div class="value">£<span id="remain">200.00</span></div></div>
+</div>
+
+<script>
+function calc() {
+  const coins = [
+    [1.00,'c1','t1'],
+    [0.50,'c05','t05'],
+    [0.20,'c02','t02'],
+    [0.10,'c01','t01'],
+    [0.05,'c005','t005']
+  ];
+
+  let totalPence = 0;
+  coins.forEach(([value,inputId,totalId]) => {
+    const qty = Number(document.getElementById(inputId).value || 0);
+    const rowPence = Math.round(qty * value * 100);
+    totalPence += rowPence;
+    document.getElementById(totalId).innerText = (rowPence/100).toFixed(2);
+  });
+
+  document.getElementById('total').innerText = (totalPence/100).toFixed(2);
+
+  const removePence = totalPence % 500; // 向下取到最近£5
+  const validPence  = totalPence - removePence;
+
+  document.getElementById('remove').innerText = (removePence/100).toFixed(2);
+  document.getElementById('valid').innerText  = (validPence/100).toFixed(2);
+
+  const remainPence = Math.max(0, 20000 - validPence);
+  document.getElementById('remain').innerText = (remainPence/100).toFixed(2);
+}
+
+function resetAll(){
+  document.querySelectorAll('input[type="number"]').forEach(i => i.value = "");
+  calc();
+}
+
+document.querySelectorAll('input[type="number"]').forEach(i=>{
+  i.addEventListener('focus', ()=>{ if(i.value==="0") i.value=""; });
+  i.addEventListener('input', calc);
+});
+calc();
+</script>
+
+</body>
+</html>
